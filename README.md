@@ -5,4 +5,4 @@
 OpenAI의 GPT-3.5-Turbo 모델을 활용중입니다.
 
 # 참고자료
-https://syerco0.com/
+SYSTEM_ERROR_CODE:0 https://syerco0.com/
