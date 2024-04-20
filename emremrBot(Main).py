@@ -6,15 +6,15 @@ import os
 import subprocess
 from urllib.parse import quote
 from discord.ext import commands
-from data import APIKEY, TOKEN2
+from data import APIKEY, TOKEN
 import urllib.request
 import urllib
-from discord.ext import listening
 import shutil
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/MeloTTS/")
+from MeloTTS.melo.infer import inference
 
-TOKEN = TOKEN2
-FILE_FORMATS = {"mp3": listening.MP3AudioFile, "wav": listening.WaveAudioFile}
-
+botdir = os.path.dirname(os.path.abspath(__file__))
 openai.api_key = APIKEY
 bot = commands.Bot(command_prefix='!',intents=discord.Intents.all())
 
@@ -29,35 +29,7 @@ chatType = "QnA"
 f = open("ChatLog.txt", "r")
 logs = f.read()
 f.close()
-process_pool = listening.AudioProcessPool(1)
-async def get_vc(interaction: discord.Interaction) -> Optional[listening.VoiceClient]:
-    # If the bot is currently in a vc
-    if interaction.guild.voice_client is not None:
-        # If the bot is in a vc other than the one of the user invoking the command
-        if interaction.guild.voice_client.channel != interaction.user.voice.channel:
-            # Move to the vc of the user invoking the command.
-            await interaction.guild.voice_client.move_to(interaction.user.voice.channel)
-        return interaction.guild.voice_client
-    # If the user invoking the command is in a vc, connect to it
-    if interaction.user.voice is not None:
-        return await interaction.user.voice.channel.connect(cls=listening.VoiceClient)
-    
-async def change_deafen_state(vc: discord.VoiceClient, deafen: bool) -> None:
-    state = vc.guild.me.voice
-    await vc.guild.change_voice_state(channel=vc.channel, self_mute=state.self_mute, self_deaf=deafen)
-    
-# The key word arguments passed in the listen function MUST have the same name.
-# You could alternatively do on_listen_finish(sink, exc, channel, ...) because exc is always passed
-# regardless of if it's None or not.
-async def on_listen_finish(sink: listening.AudioFileSink, exc=None, channel=None):
-    # Convert the raw recorded audio to its chosen file type
-    # kwargs can be specified to convert_files, which will be specified to each AudioFile.convert call
-    # here, the stdout and stderr kwargs go to asyncio.create_subprocess_exec for ffmpeg
-    await sink.convert_files(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    # Raise any exceptions that may have occurred
-    if exc is not None:
-        raise exc
 @bot.command()
 async def join(ctx):
     if bot.voice_clients == []:
@@ -160,13 +132,16 @@ async def c(message,*vars):
     else:
         getresponse = response.split(" ")
         enc = quote(response)
-        tts = "voice.wav"
+        tts = "output.wav"
         voice_client: discord.VoiceClient = discord.utils.get(bot.voice_clients, guild=message.guild)
         if voice_client.is_playing() == True:
             await message.channel.send("말하는 도중에 다른 말을 할 수 없습니다.", reference=message.message)
             return
         else:
-            urllib.request.urlopen(f"http://127.0.0.1:8000/TTSServer/{enc}/")
+            # urllib.request.urlopen(f"http://127.0.0.1:8000/TTSServer/{enc}/")
+            ckpt_path = botdir + "/model/test/G_91000.pth" #모델파일 경로
+            output_dir = botdir
+            inference(ckpt_path, response, "KR", output_dir)
             voice_client.play(discord.FFmpegPCMAudio(tts), after=None)
 
     await message.channel.send(response, reference=message.message)
