@@ -1,4 +1,4 @@
-## emremrChatBot
+## DiscordChatBot
 
 대화 가능한 인공지능 디스코드 봇 프로젝트입니다.
 
