@@ -1,6 +1,6 @@
 ## DiscordChatBot
 
-대화 가능한 인공지능 디스코드 봇 프로젝트입니다.
+대화형 인공지능 디스코드 봇 프로젝트입니다.
 
 OpenAI의 GPT-3.5-Turbo 모델을 활용중입니다.
 
@@ -66,7 +66,8 @@ conda install ffmpeg
 - [x] 디스코드 봇 생성
 - [x] LLM(Large-Language-Model) 탑재
 - [x] TTS(Text-To-Speech) 모델 학습 및 탑재
-- [ ] 디스코드 음성 녹음 구현
+- [ ] 여러 LLM 모델 선택기능
+- [ ] 디스코드 음성 녹음
 - [ ] Speech Recognition로 녹음된 음성 텍스트로 변환
 
 ---
